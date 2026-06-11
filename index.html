@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Protocol Drift – UI Mockup</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
+
+  /* TOPBAR */
+  .topbar { background: #1a1d23; color: #fff; padding: 0 24px; display: flex; align-items: center; gap: 16px; position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 56px; }
+  .topbar h1 { margin: 0; font-size: 16px; font-weight: 600; }
+  .active-profile-badge { margin-left: auto; background: #1d4ed8; border-radius: 6px; padding: 4px 12px; font-size: 12px; color: #fff; cursor: pointer; white-space: nowrap; }
+  .profile-switcher { background: #2d3748; color: #9ca3af; border: none; font-size: 12px; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+
+  /* SIDEBAR */
+  .sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 200px; background: #1e2128; padding-top: 56px; z-index: 50; overflow-y: auto; }
+  .sidebar a { display: block; padding: 10px 20px; color: #9ca3af; font-size: 13px; text-decoration: none; cursor: pointer; }
+  .sidebar a.active { background: #2d3748; color: #fff; border-left: 3px solid #3b82f6; }
+
+  /* SCREENS */
+  .screen { display: none; margin-left: 200px; margin-top: 56px; padding: 24px; }
+  .screen.active { display: block; }
+  .page-header { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .page-title { font-size: 20px; font-weight: 700; color: #1a1d23; }
+  .page-badge { background: #3b82f6; color: #fff; border-radius: 4px; padding: 2px 8px; font-size: 12px; }
+  .page-sub { font-size: 13px; color: #6b7280; margin-bottom: 20px; }
+  .breadcrumb { font-size: 12px; color: #6b7280; margin-bottom: 8px; }
+
+  /* KPI */
+  .kpi-row { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+  .kpi { background: #fff; border-radius: 10px; padding: 16px 20px; flex: 1; min-width: 130px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .kpi .label { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+  .kpi .value { font-size: 24px; font-weight: 700; color: #1a1d23; }
+  .kpi .sub { font-size: 12px; margin-top: 2px; }
+  .kpi.red .value { color: #ef4444; } .kpi.yellow .value { color: #f59e0b; } .kpi.green .value { color: #10b981; }
+
+  /* FILTER */
+  .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .filter-bar select { padding: 7px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; background: #fff; }
+  .filter-bar button { padding: 7px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; border: none; background: #3b82f6; color: #fff; }
+  .btn { padding: 7px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; border: none; }
+  .btn-primary { background: #3b82f6; color: #fff; }
+  .btn-secondary { background: #fff; color: #374151; border: 1px solid #d1d5db; }
+  .btn-danger { background: #fee2e2; color: #ef4444; border: none; }
+  .btn-sm { padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; border: 1px solid #d1d5db; background: #fff; color: #374151; }
+  .action-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .action-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+
+  /* TABLE */
+  .table-wrap { border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 20px; }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; background: #fff; }
+  thead { background: #f9fafb; }
+  th { padding: 11px 16px; text-align: left; font-size: 12px; color: #6b7280; font-weight: 600; border-bottom: 1px solid #e5e7eb; }
+  td { padding: 13px 16px; font-size: 13px; color: #374151; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #f9fafb; cursor: pointer; }
+  tr.row-alert td { background: #fff5f5; }
+  tr.site-row td { background: #f3f4f6; font-weight: 600; color: #111827; font-size: 12px; }
+
+  /* BADGES */
+  .badge-status { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-high { background: #fee2e2; color: #ef4444; }
+  .badge-medium { background: #fef3c7; color: #d97706; }
+  .badge-low { background: #d1fae5; color: #059669; }
+  .tag { padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .tag-ok { background: #d1fae5; color: #059669; }
+  .tag-warn { background: #fef3c7; color: #d97706; }
+  .tag-high { background: #fee2e2; color: #ef4444; }
+  .tag-na { background: #f3f4f6; color: #6b7280; }
+
+  /* BAR */
+  .bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .bar { height: 8px; border-radius: 4px; }
+  .bar-red { background: #ef4444; } .bar-yellow { background: #f59e0b; } .bar-green { background: #10b981; }
+  .dev-ok { color: #10b981; font-weight: 600; }
+  .dev-warn { color: #f59e0b; font-weight: 600; }
+  .dev-high { color: #ef4444; font-weight: 600; }
+
+  /* META */
+  .meta-row { display: flex; gap: 8px; margin-bottom: 20px; font-size: 12px; flex-wrap: wrap; }
+  .meta-row span { background: #e5e7eb; padding: 3px 8px; border-radius: 4px; color: #374151; }
+
+  /* CARD */
+  .card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 20px; }
+  .card-title { font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+
+  /* TABS */
+  .tab-bar { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; }
+  .tab-btn { padding: 9px 18px; font-size: 13px; cursor: pointer; border: none; background: transparent; color: #6b7280; font-weight: 500; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+  .tab-btn.active { color: #3b82f6; border-bottom-color: #3b82f6; font-weight: 600; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* BASELINE */
+  .draft-card { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 16px; margin-bottom: 20px; }
+  .draft-title { font-size: 13px; font-weight: 600; color: #92400e; margin-bottom: 10px; }
+  .draft-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .draft-field { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px 12px; font-size: 12px; }
+  .draft-field .label { color: #6b7280; font-size: 11px; }
+  .draft-field .val { color: #111827; font-weight: 500; margin-top: 2px; }
+  .draft-field.missing { border-color: #fca5a5; background: #fff1f2; }
+  .draft-field.missing .val { color: #ef4444; }
+  .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+  .version-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
+  .version-row:last-child { border-bottom: none; }
+  .v-tag { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 12px; }
+  .v-active { background: #d1fae5; color: #059669; }
+  .v-old { background: #f3f4f6; color: #6b7280; }
+  .v-actions { display: flex; gap: 8px; }
+  .upload-btn { padding: 6px 16px; border: 1px solid #3b82f6; border-radius: 6px; color: #3b82f6; font-size: 12px; cursor: pointer; background: #fff; }
+  .source-tag { background: #e0f2fe; color: #0369a1; padding: 2px 7px; border-radius: 10px; font-size: 11px; }
+
+  /* TIMELINE */
+  .timeline { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .tl-row { display: flex; align-items: center; margin-bottom: 6px; }
+  .tl-time { width: 56px; font-size: 12px; color: #6b7280; flex-shrink: 0; }
+  .tl-block { height: 28px; border-radius: 4px; display: flex; align-items: center; padding: 0 10px; font-size: 12px; color: #fff; font-weight: 500; white-space: nowrap; }
+  .tl-seq { background: #3b82f6; cursor: pointer; }
+  .tl-seq:hover { background: #2563eb; }
+  .tl-dead { background: #ef4444; }
+  .tl-gap { height: 20px; display: flex; align-items: center; margin-left: 56px; margin-bottom: 6px; }
+  .tl-gap-line { width: 2px; background: #e5e7eb; margin: 0 12px; height: 100%; }
+  .tl-gap-label { font-size: 11px; }
+  .gap-ok { color: #10b981; } .gap-warn { color: #f59e0b; } .gap-alert { color: #ef4444; font-weight: 600; }
+  .agg { display: flex; gap: 20px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #f3f4f6; font-size: 12px; color: #6b7280; flex-wrap: wrap; }
+  .agg span { font-weight: 600; color: #374151; }
+
+  /* TIME PERIOD VIEW */
+  .timeperiod-bar { position: relative; height: 60px; background: #f9fafb; border-radius: 8px; overflow: hidden; margin-bottom: 8px; }
+  .tp-block { position: absolute; top: 10px; height: 40px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff; cursor: pointer; font-weight: 500; }
+  .tp-protocol { background: #3b82f6; }
+  .tp-protocol:hover { background: #2563eb; }
+  .tp-gap { background: #fef3c7; border: 1px solid #f59e0b; color: #d97706; font-size: 10px; }
+  .tp-dead { background: #fee2e2; border: 1px solid #ef4444; color: #ef4444; font-size: 10px; font-weight: 600; }
+  .tp-axis { display: flex; justify-content: space-between; font-size: 11px; color: #9ca3af; padding: 0 4px; margin-bottom: 12px; }
+
+  /* SERIES SUBROW */
+  .series-detail-row { display: none; background: #f9fafb; }
+  .series-detail-row td { padding: 0; }
+  .series-inner-table { width: 100%; }
+  .series-inner-table th { background: #f3f4f6; font-size: 11px; }
+  .series-inner-table td { font-size: 12px; }
+
+  /* TREND CHART */
+  .trend-chart-wrap { width: 100%; overflow-x: auto; }
+  svg text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+  /* PROFILES */
+  .two-col { display: flex; gap: 20px; }
+  .profile-list { width: 260px; flex-shrink: 0; }
+  .profile-editor { flex: 1; }
+  .profile-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 7px; margin-bottom: 6px; cursor: pointer; border: 1px solid transparent; }
+  .profile-item:hover { background: #f9fafb; }
+  .profile-item.selected { background: #eff6ff; border-color: #bfdbfe; }
+  .profile-name { font-size: 13px; font-weight: 500; color: #111827; }
+  .profile-scope { font-size: 11px; color: #6b7280; }
+  .toggle { width: 32px; height: 18px; border-radius: 9px; background: #d1d5db; position: relative; cursor: pointer; flex-shrink: 0; }
+  .toggle.on { background: #3b82f6; }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: left 0.2s; }
+  .toggle.on::after { left: 16px; }
+  .condition-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .condition-row select, .condition-row input { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 5px; font-size: 12px; background: #fff; }
+  .add-condition { font-size: 12px; color: #3b82f6; cursor: pointer; margin-top: 4px; }
+  .preview-count { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 10px 14px; font-size: 12px; color: #1d4ed8; margin-top: 12px; }
+
+  /* INPUT */
+  input[type=text] { padding: 5px 8px; border: 1px solid #d1d5db; border-radius: 5px; font-size: 13px; text-align: center; }
+  select { padding: 5px 8px; border: 1px solid #d1d5db; border-radius: 5px; font-size: 12px; background: #fff; }
+
+  /* IQ MARKER */
+  .iq-marker-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 6px; padding: 8px 12px; }
+  .iq-marker-row input[type=date] { padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; }
+  .iq-marker-label { font-size: 12px; color: #9a3412; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <h1>⚡ Protocol Drift</h1>
+  <div class="active-profile-badge" onclick="navigateTo('s6')">
+    👤 Active: Brain MRI – New Operators
+  </div>
+  <select class="profile-switcher" onchange="updateActiveProfile(this.value)">
+    <option>Brain MRI – New Operators</option>
+    <option>Cardiac Exams</option>
+    <option>High-Volume Days</option>
+    <option>Brain Protocol Only</option>
+  </select>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <a href="#" class="nav-link active" data-screen="s1">🗂 Fleet Overview</a>
+  <a href="#" class="nav-link" data-screen="s2">📊 Drift Detail</a>
+  <a href="#" class="nav-link" data-screen="s3">📈 Trends & Alerts</a>
+  <a href="#" class="nav-link" data-screen="s4">📋 Baselines</a>
+  <a href="#" class="nav-link" data-screen="s5">⏱ Workflow</a>
+  <a href="#" class="nav-link" data-screen="s6">👤 Profiles</a>
+</div>
+
+<!-- ===================== SCREEN 1: Fleet Overview ===================== -->
+<div id="s1" class="screen active">
+  <div class="page-header">
+    <div class="page-title">Fleet Overview</div>
+    <span class="page-badge">Live</span>
+  </div>
+  <div class="page-sub">All sites · All scanners · Last 7 days</div>
+  <div class="filter-bar">
+    <select><option>All Sites</option><option>Hospital A</option><option>Hospital B</option></select>
+    <select><option>All Scanners</option><option>MRI-01</option><option>MRI-02</option></select>
+    <select><option>Last 7 days</option><option>Last 30 days</option></select>
+    <button>Apply</button>
+  </div>
+  <div class="kpi-row">
+    <div class="kpi red"><div class="label">High Drift Scanners</div><div class="value">2</div><div class="sub" style="color:#ef4444">▲ 1 from last week</div></div>
+    <div class="kpi yellow"><div class="label">Protocol Time Alerts</div><div class="value">5</div><div class="sub" style="color:#f59e0b">3 unacknowledged</div></div>
+    <div class="kpi green"><div class="label">Scanners OK</div><div class="value">5</div><div class="sub" style="color:#10b981">Within baseline</div></div>
+    <div class="kpi"><div class="label">Avg Drift Score</div><div class="value">41%</div><div class="sub" style="color:#6b7280">Across all scanners</div></div>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Site</th><th>Scanner</th><th>Active Protocol</th><th>Drift Score</th><th>Time Alerts</th><th>Last Scan</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr class="site-row"><td colspan="7">🏥 Hospital A — Seoul</td></tr>
+      <tr onclick="navigateTo('s2')"><td></td><td>MRI-01</td><td>Brain / Spine</td><td><div class="bar-wrap"><div class="bar bar-yellow" style="width:42px"></div><span>42%</span></div></td><td>1</td><td>10 min ago</td><td><span class="badge-status badge-medium">⚠ Medium</span></td></tr>
+      <tr onclick="navigateTo('s2')" style="background:#fff5f5"><td></td><td>MRI-02</td><td>Brain / Cardiac</td><td><div class="bar-wrap"><div class="bar bar-red" style="width:78px"></div><span>78%</span></div></td><td>4</td><td>25 min ago</td><td><span class="badge-status badge-high">🔴 High</span></td></tr>
+      <tr class="site-row"><td colspan="7">🏥 Hospital B — Busan</td></tr>
+      <tr onclick="navigateTo('s2')"><td></td><td>MRI-03</td><td>Knee / Shoulder</td><td><div class="bar-wrap"><div class="bar bar-green" style="width:18px"></div><span>18%</span></div></td><td>0</td><td>1 hr ago</td><td><span class="badge-status badge-low">✅ Low</span></td></tr>
+      <tr onclick="navigateTo('s2')"><td></td><td>MRI-04</td><td>Brain</td><td><div class="bar-wrap"><div class="bar bar-yellow" style="width:55px"></div><span>55%</span></div></td><td>1</td><td>3 hr ago</td><td><span class="badge-status badge-medium">⚠ Medium</span></td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<!-- ===================== SCREEN 2: Drift Detail ===================== -->
+<div id="s2" class="screen">
+  <div class="breadcrumb">Hospital A › MRI-02 › Brain Protocol</div>
+  <div class="page-header"><div class="page-title">Drift Detail — Brain Protocol</div></div>
+  <div class="meta-row">
+    <span>🖥 MRI-02</span><span>👤 J.Kim</span><span>📅 2026-05-20</span><span>Baseline: v3 (Active)</span>
+  </div>
+  <div class="action-bar">
+    <button class="btn btn-secondary" onclick="navigateTo('s4')">📋 Baseline History</button>
+    <button class="btn btn-secondary" onclick="navigateTo('s3')">📈 View Trends</button>
+    <button class="btn btn-primary">⬇️ Export</button>
+  </div>
+
+  <!-- Protocol-level summary KPIs (no parameter detail here) -->
+  <div class="kpi-row">
+    <div class="kpi red"><div class="label">Alert Series</div><div class="value">2</div><div class="sub" style="color:#ef4444">Click to inspect</div></div>
+    <div class="kpi yellow"><div class="label">Warn Series</div><div class="value">1</div><div class="sub" style="color:#f59e0b">Monitoring</div></div>
+    <div class="kpi green"><div class="label">OK Series</div><div class="value">4</div><div class="sub" style="color:#10b981">Within baseline</div></div>
+    <div class="kpi yellow"><div class="label">Avg Protocol Duration</div><div class="value" style="color:#f59e0b">+12%</div><div class="sub" style="color:#f59e0b">vs. baseline</div></div>
+  </div>
+
+  <div style="font-size:13px;color:#6b7280;margin-bottom:10px;">
+    ℹ️ Click any series row to expand parameter details
+  </div>
+
+  <!-- Series-level table with expandable parameter detail -->
+  <div class="table-wrap"><table>
+    <thead><tr><th>Series</th><th>Status</th><th>Alert Count</th><th>Avg Duration</th><th>vs. Baseline</th><th></th></tr></thead>
+    <tbody>
+      <tr onclick="toggleSeries('detail-t1')">
+        <td>Brain T1</td>
+        <td><span class="tag tag-ok">✅ OK</span></td>
+        <td>0</td><td>4m 20s</td><td class="dev-ok">+1.2%</td><td>▶</td>
+      </tr>
+      <tr class="series-detail-row" id="detail-t1">
+        <td colspan="6">
+          <table class="series-inner-table">
+            <thead><tr><th>Parameter</th><th>Baseline</th><th>Observed</th><th>Δ</th><th>Trend (7d)</th></tr></thead>
+            <tbody>
+              <tr><td>TR (ms)</td><td>2000</td><td>2024</td><td class="dev-ok">+1.2%</td><td>➡️</td></tr>
+              <tr><td>TE (ms)</td><td>30</td><td>30</td><td class="dev-ok">0%</td><td>➡️</td></tr>
+              <tr><td>Flip Angle (°)</td><td>90</td><td>89</td><td class="dev-ok">−1.1%</td><td>➡️</td></tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+      <tr onclick="toggleSeries('detail-t2')">
+        <td>Brain T2</td>
+        <td><span class="tag tag-high">🔴 Alert</span></td>
+        <td>2</td><td>3m 45s</td><td class="dev-high">+21.6%</td><td>▶</td>
+      </tr>
+      <tr class="series-detail-row" id="detail-t2">
+        <td colspan="6">
+          <table class="series-inner-table">
+            <thead><tr><th>Parameter</th><th>Baseline</th><th>Observed</th><th>Δ</th><th>Trend (7d)</th></tr></thead>
+            <tbody>
+              <tr class="row-alert"><td>Number of Slices</td><td>24</td><td>20</td><td class="dev-high">−16.7%</td><td>📉</td></tr>
+              <tr class="row-alert"><td>Phase Oversampling %</td><td>10%</td><td>15%</td><td class="dev-high">+50.0%</td><td>📈</td></tr>
+              <tr><td>TR (ms)</td><td>2000</td><td>2150</td><td class="dev-warn">+7.5%</td><td>📈</td></tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+      <tr onclick="toggleSeries('detail-dwi')">
+        <td>DWI</td>
+        <td><span class="tag tag-warn">⚠ Warn</span></td>
+        <td>1</td><td>5m 50s</td><td class="dev-warn">+8.0%</td><td>▶</td>
+      </tr>
+      <tr class="series-detail-row" id="detail-dwi">
+        <td colspan="6">
+          <table class="series-inner-table">
+            <thead><tr><th>Parameter</th><th>Baseline</th><th>Observed</th><th>Δ</th><th>Trend (7d)</th></tr></thead>
+            <tbody>
+              <tr><td>b-value</td><td>1000</td><td>1000</td><td class="dev-ok">0%</td><td>➡️</td></tr>
+              <tr><td>TR (ms)</td><td>5000</td><td>5400</td><td class="dev-warn">+8.0%</td><td>📈</td></tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+      <tr onclick="toggleSeries('detail-flair')">
+        <td>FLAIR</td><td><span class="tag tag-ok">✅ OK</span></td>
+        <td>0</td><td>3m 48s</td><td class="dev-ok">+0.9%</td><td>▶</td>
+      </tr>
+      <tr class="series-detail-row" id="detail-flair">
+        <td colspan="6">
+          <table class="series-inner-table">
+            <thead><tr><th>Parameter</th><th>Baseline</th><th>Observed</th><th>Δ</th><th>Trend (7d)</th></tr></thead>
+            <tbody>
+              <tr><td>TI (ms)</td><td>2500</td><td>2522</td><td class="dev-ok">+0.9%</td><td>➡️</td></tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    </tbody>
+  </table></div>
+</div>
+
+<!-- ===================== SCREEN 3: Trends & Alerts ===================== -->
+<div id="s3" class="screen">
+  <div class="page-header"><div class="page-title">Trends & Alerts</div></div>
+  <div class="page-sub">Brain Protocol · MRI-02 · Hospital A</div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('trend', this)">📈 Parameter Trends</button>
+    <button class="tab-btn" onclick="switchTab('time-threshold', this)">⏱ Time Thresholds</button>
+  </div>
+
+  <!-- TAB: Parameter Trends -->
+  <div id="tab-trend" class="tab-content active">
+    <div class="card">
+      <div class="card-title">
+        <span>Select Series & Parameter</span>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        <select>
+          <option>Brain T2</option><option>Brain T1</option><option>DWI</option><option>FLAIR</option>
+        </select>
+        <select>
+          <option>TR (ms)</option><option>TE (ms)</option><option>Num Slices</option>
+          <option>Phase Oversampling %</option><option>Flip Angle</option>
+        </select>
+        <select>
+          <option>Last 90 days</option><option>Last 30 days</option><option>Last 180 days</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        TR (ms) — Brain T2 — 90-day Trend
+        <button class="btn btn-secondary" style="font-size:12px;" onclick="toggleIqMarker()">🚩 Mark IQ Change Point</button>
+      </div>
+
+      <div id="iq-marker-panel" style="display:none" class="iq-marker-row">
+        <span class="iq-marker-label">🚩 IQ Issue Reported:</span>
+        <input type="date" value="2026-04-20">
+        <button class="btn btn-primary" style="font-size:12px;padding:5px 12px;">Apply Marker</button>
+        <span style="font-size:12px;color:#6b7280;">The chart will highlight parameter changes leading up to this date.</span>
+      </div>
+
+      <div class="trend-chart-wrap" style="margin-top:16px;">
+        <svg viewBox="0 0 620 160" style="width:100%;height:160px;">
+          <!-- Grid lines -->
+          <line x1="50" y1="20" x2="600" y2="20" stroke="#f3f4f6" stroke-width="1"/>
+          <line x1="50" y1="60" x2="600" y2="60" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4"/>
+          <line x1="50" y1="100" x2="600" y2="100" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4"/>
+          <line x1="50" y1="130" x2="600" y2="130" stroke="#f3f4f6" stroke-width="1"/>
+          <!-- Y axis labels -->
+          <text x="44" y="64" font-size="10" fill="#9ca3af" text-anchor="end">2200</text>
+          <text x="44" y="104" font-size="10" fill="#9ca3af" text-anchor="end">2000</text>
+          <text x="44" y="134" font-size="10" fill="#9ca3af" text-anchor="end">1800</text>
+          <!-- Baseline reference line -->
+          <line x1="50" y1="100" x2="600" y2="100" stroke="#10b981" stroke-width="1.5" stroke-dasharray="6,3"/>
+          <text x="604" y="103" font-size="10" fill="#10b981">Baseline</text>
+          <!-- Highlight zone: change period -->
+          <rect x="350" y="15" width="130" height="120" fill="#fef3c7" opacity="0.5" rx="3"/>
+          <text x="355" y="28" font-size="10" fill="#d97706" font-weight="600">Change Zone</text>
+          <!-- Trend line -->
+          <polyline
+            points="50,98 100,97 150,96 200,95 250,93 300,91 350,88 400,84 450,79 500,72 550,65 600,58"
+            fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linejoin="round"/>
+          <!-- IQ marker line -->
+          <line x1="480" y1="15" x2="480" y2="145" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <text x="484" y="26" font-size="10" fill="#ef4444" font-weight="600">IQ Issue</text>
+          <text x="484" y="38" font-size="10" fill="#ef4444">Reported</text>
+          <!-- X axis labels -->
+          <text x="50" y="155" font-size="10" fill="#9ca3af">Mar 1</text>
+          <text x="175" y="155" font-size="10" fill="#9ca3af">Mar 31</text>
+          <text x="300" y="155" font-size="10" fill="#9ca3af">Apr 15</text>
+          <text x="425" y="155" font-size="10" fill="#9ca3af">Apr 30</text>
+          <text x="560" y="155" font-size="10" fill="#9ca3af">May 20</text>
+        </svg>
+      </div>
+
+      <div style="display:flex;gap:24px;font-size:12px;color:#6b7280;margin-top:10px;flex-wrap:wrap;">
+        <span>Baseline: <strong>2000 ms</strong></span>
+        <span>Current: <strong>2150 ms</strong></span>
+        <span>Change: <strong style="color:#ef4444">+7.5%</strong></span>
+        <span>Drift started: <strong style="color:#d97706">~30 days ago</strong></span>
+        <span>IQ issue reported: <strong style="color:#ef4444">Apr 20, 2026</strong></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">All Parameters — Quick Trend Status · Brain T2</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary" style="font-size:12px;">TR (ms) 📈</button>
+        <button class="btn btn-secondary" style="font-size:12px;">TE (ms) ➡️</button>
+        <button class="btn btn-secondary" style="font-size:12px;">Flip Angle ➡️</button>
+        <button class="btn btn-secondary" style="font-size:12px;color:#ef4444;border-color:#ef4444;">Num Slices 📉</button>
+        <button class="btn btn-secondary" style="font-size:12px;color:#ef4444;border-color:#ef4444;">Phase OS% 📈</button>
+        <button class="btn btn-secondary" style="font-size:12px;">Bandwidth ➡️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: Time Thresholds -->
+  <div id="tab-time-threshold" class="tab-content">
+    <div class="card">
+      <div class="card-title">⏱ Protocol Time Alert Thresholds</div>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:14px;">
+        Alerts are triggered only when <strong>protocol or series duration</strong> deviates significantly from baseline. Parameter drift is tracked via trend charts, not thresholds.
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Series</th><th>Baseline Duration</th><th>⚠ Warn if exceeds</th><th>🔴 Alert if exceeds</th><th>Scope</th></tr></thead>
+        <tbody>
+          <tr><td>Brain T1</td><td>4m 20s</td><td><input type="text" value="+15%" style="width:60px"></td><td><input type="text" value="+30%" style="width:60px"></td><td><select><option>Global</option><option selected>Protocol</option><option>Series</option></select></td></tr>
+          <tr><td>Brain T2</td><td>3m 05s</td><td><input type="text" value="+15%" style="width:60px"></td><td><input type="text" value="+30%" style="width:60px"></td><td><select><option>Global</option><option selected>Protocol</option><option>Series</option></select></td></tr>
+          <tr><td>DWI</td><td>5m 44s</td><td><input type="text" value="+10%" style="width:60px"></td><td><input type="text" value="+25%" style="width:60px"></td><td><select><option>Global</option><option>Protocol</option><option selected>Series</option></select></td></tr>
+          <tr><td>FLAIR</td><td>3m 50s</td><td><input type="text" value="+15%" style="width:60px"></td><td><input type="text" value="+30%" style="width:60px"></td><td><select><option>Global</option><option selected>Protocol</option><option>Series</option></select></td></tr>
+          <tr><td>SWI</td><td>4m 30s</td><td><input type="text" value="+15%" style="width:60px"></td><td><input type="text" value="+30%" style="width:60px"></td><td><select><option>Global</option><option selected>Protocol</option><option>Series</option></select></td></tr>
+        </tbody>
+      </table></div>
+      <div class="action-row">
+        <button class="btn btn-primary">💾 Save Thresholds</button>
+        <button class="btn btn-secondary">📜 View Audit Log</button>
+        <button class="btn btn-secondary">↩ Reset to Default</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN 4: Baseline Manager ===================== -->
+<div id="s4" class="screen">
+  <div class="page-header"><div class="page-title">Baseline Manager</div></div>
+  <div class="page-sub">Brain Protocol · MRI-02 · Hospital A</div>
+
+  <!-- Baseline Source Selection -->
+  <div class="card">
+    <div class="card-title">📥 Baseline Source</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-secondary">🔄 Collector Data</button>
+      <button class="btn btn-primary">📄 Upload Source File</button>
+      <button class="btn btn-secondary">✏️ Manual Input</button>
+      <button class="btn btn-secondary">🔬 From Sample Exam</button>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:#6b7280;">
+      Current baseline source: <strong>PDF Upload</strong> · Uploaded by J.Kim · 2026-05-10
+    </div>
+  </div>
+
+  <!-- Draft Review -->
+  <div class="draft-card">
+    <div class="draft-title">📄 Review Draft: v4 (Parsed from PDF — Awaiting Activation)</div>
+    <div class="draft-grid">
+      <div class="draft-field"><div class="label">TR (ms)</div><div class="val">2000 ✎</div></div>
+      <div class="draft-field"><div class="label">TE (ms)</div><div class="val">30 ✎</div></div>
+      <div class="draft-field"><div class="label">Number of Slices</div><div class="val">24 ✎</div></div>
+      <div class="draft-field missing"><div class="label">Phase Oversampling %</div><div class="val">⚠ NOT FOUND — manual entry required</div></div>
+      <div class="draft-field"><div class="label">Parallel Imaging Factor</div><div class="val">2 ✎</div></div>
+      <div class="draft-field"><div class="label">Flip Angle (°)</div><div class="val">90 ✎</div></div>
+    </div>
+    <div class="draft-actions">
+      <button class="btn btn-primary">✅ Activate v4</button>
+      <button class="btn btn-danger">🗑 Discard Draft</button>
+    </div>
+  </div>
+
+  <!-- Version History -->
+  <div class="card">
+    <div class="card-title"><span>📋 Version History</span><button class="upload-btn">+ Upload PDF</button></div>
+    <div class="version-row">
+      <div>
+        <span class="v-tag v-active">v3 ✓ Active</span>
+        &nbsp; 2026-05-10 by J.Kim &nbsp;
+        <span class="source-tag">📄 PDF Upload</span>
+      </div>
+      <div class="v-actions"><button class="btn-sm">Diff</button><button class="btn-sm">Rollback</button></div>
+    </div>
+    <div class="version-row">
+      <div>
+        <span class="v-tag v-old">v2</span>
+        &nbsp; 2026-03-01 by Admin &nbsp;
+        <span class="source-tag">🔄 Collector Data</span>
+      </div>
+      <div class="v-actions"><button class="btn-sm">Diff</button><button class="btn-sm">Restore</button></div>
+    </div>
+    <div class="version-row">
+      <div>
+        <span class="v-tag v-old">v1</span>
+        &nbsp; 2026-01-15 by Admin &nbsp;
+        <span class="source-tag">✏️ Manual Input</span>
+      </div>
+      <div class="v-actions"><button class="btn-sm">Diff</button><button class="btn-sm">Restore</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN 5: Workflow ===================== -->
+<div id="s5" class="screen">
+  <div class="page-header"><div class="page-title">Workflow</div></div>
+  <div class="page-sub">MRI-01 · Hospital A · 2026-05-20</div>
+
+  <!-- View Toggle -->
+  <div style="display:flex;gap:0;margin-bottom:20px;">
+    <button class="btn btn-primary" id="btn-protocol-view" onclick="switchWorkflowView('protocol')" style="border-radius:6px 0 0 6px;">📋 Protocol View</button>
+    <button class="btn btn-secondary" id="btn-timeperiod-view" onclick="switchWorkflowView('timeperiod')" style="border-radius:0 6px 6px 0;">📅 Time Period View</button>
+  </div>
+
+  <!-- KPIs (shared) -->
+  <div class="kpi-row">
+    <div class="kpi"><div class="label">Total Sequences</div><div class="value">6</div></div>
+    <div class="kpi"><div class="label">Avg Protocol Duration</div><div class="value" style="color:#3b82f6">4m 12s</div></div>
+    <div class="kpi"><div class="label">Avg Inter-Sequence Gap</div><div class="value" style="color:#f59e0b">7 min</div></div>
+    <div class="kpi"><div class="label">Total Dead Time</div><div class="value" style="color:#ef4444">45 min</div></div>
+    <div class="kpi"><div class="label">Scanner Utilization</div><div class="value">62%</div></div>
+  </div>
+
+  <!-- Protocol View -->
+  <div id="view-protocol">
+    <div class="timeline">
+      <div style="font-size:13px;font-weight:600;color:#111827;margin-bottom:14px;">📋 Sequence Timeline — Brain Protocol</div>
+      <div class="tl-row"><div class="tl-time">08:00</div><div class="tl-block tl-seq" style="width:200px">Seq 1: Brain T1 · 4m 20s</div></div>
+      <div class="tl-gap"><div class="tl-gap-line"></div><span class="tl-gap-label gap-alert">⚠️ Gap: 12 min (expected &lt; 5 min)</span></div>
+      <div class="tl-row"><div class="tl-time">08:32</div><div class="tl-block tl-seq" style="width:155px">Seq 2: Brain T2 · 3m 05s</div></div>
+      <div class="tl-gap"><div class="tl-gap-line"></div><span class="tl-gap-label gap-ok">✅ Gap: 2 min</span></div>
+      <div class="tl-row"><div class="tl-time">08:37</div><div class="tl-block tl-seq" style="width:240px">Seq 3: DWI · 5m 44s</div></div>
+      <div class="tl-gap"><div class="tl-gap-line"></div><span class="tl-gap-label gap-ok">✅ Gap: 3 min</span></div>
+      <div class="tl-row"><div class="tl-time">08:45</div><div class="tl-block tl-seq" style="width:180px">Seq 4: FLAIR · 3m 50s</div></div>
+      <div class="tl-gap"><div class="tl-gap-line"></div><span class="tl-gap-label gap-warn">⚠ Gap: 6 min</span></div>
+      <div class="tl-row"><div class="tl-time">08:55</div><div class="tl-block tl-seq" style="width:210px">Seq 5: SWI · 4m 30s</div></div>
+      <div class="tl-gap"><div class="tl-gap-line"></div><span class="tl-gap-label gap-alert">🔴 Dead Time: 09:30 – 10:15 · 45 min idle</span></div>
+      <div class="tl-row"><div class="tl-time">10:15</div><div class="tl-block tl-dead" style="width:300px">💤 Dead Time · 45 min</div></div>
+      <div class="agg">
+        <div>Avg gap: <span>7 min</span></div>
+        <div>Longest gap: <span>12 min</span></div>
+        <div>Total dead time: <span>45 min</span></div>
+        <div>Scanner utilization: <span>62%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Time Period View -->
+  <div id="view-timeperiod" style="display:none;">
+    <div class="card">
+      <div class="card-title">📅 Daily Protocol Timeline — 2026-05-20 · MRI-01</div>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:14px;">
+        Click any protocol block to reveal sequence-level detail below
+      </div>
+
+      <!-- Visual timeline bar -->
+      <div class="timeperiod-bar">
+        <div class="tp-block tp-protocol" style="left:5%;width:18%;" onclick="showProtocolDetail('brain')">Brain (08:00)</div>
+        <div class="tp-block tp-gap" style="left:24%;width:4%;">Gap</div>
+        <div class="tp-block tp-protocol" style="left:29%;width:14%;" onclick="showProtocolDetail('spine')">Spine (09:00)</div>
+        <div class="tp-block tp-gap" style="left:44%;width:2%;">G</div>
+        <div class="tp-block tp-dead" style="left:47%;width:18%;">💤 Dead 09:30–10:15</div>
+        <div class="tp-block tp-protocol" style="left:66%;width:13%;" onclick="showProtocolDetail('knee')">Knee (10:15)</div>
+        <div class="tp-block tp-protocol" style="left:80%;width:12%;" onclick="showProtocolDetail('shoulder')">Shoulder (11:00)</div>
+      </div>
+      <div class="tp-axis">
+        <span>08:00</span><span>09:00</span><span>10:00</span><span>11:00</span><span>12:00</span>
+      </div>
+      <div class="agg">
+        <div>Total Dead Time: <span style="color:#ef4444">45 min</span></div>
+        <div>Total Gap Time: <span style="color:#f59e0b">23 min</span></div>
+        <div>Scanner Utilization: <span>62%</span></div>
+        <div>Total Active Scan Time: <span style="color:#10b981">3h 12m</span></div>
+      </div>
+    </div>
+
+    <!-- Protocol Detail Panel (appears on click) -->
+    <div id="protocol-detail-panel" style="display:none;">
+      <div class="card" style="border:2px solid #bfdbfe;">
+        <div class="card-title" id="detail-panel-title">📋 Brain Protocol — Sequence Detail</div>
+        <div class="timeline" style="box-shadow:none;padding:0;">
+          <div class="tl-row"><div class="tl-time">08:00</div><div class="tl-block tl-seq" style="width:200px">Brain T1 · 4m 20s</div></div>
+          <div class="tl-gap"><div class="tl-gap-line"></div><span class="tl-gap-label gap-alert">⚠️ Gap: 12 min</span></div>
+          <div class="tl-row"><div class="tl-time">08:32</div><div class="tl-block tl-seq" style="width:155px">Brain T2 · 3m 05s</div></div>
+          <div class="tl-gap"><div class="tl-gap-line"></div><span class="tl-gap-label gap-ok">✅ Gap: 2 min</span></div>
+          <div class="tl-row"><div class="tl-time">08:37</div><div class="tl-block tl-seq" style="width:240px">DWI · 5m 44s</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN 6: Monitoring Profiles ===================== -->
+<div id="s6" class="screen">
+  <div class="page-header"><div class="page-title">Monitoring Profiles</div></div>
+  <div class="page-sub">Profiles define targeted monitoring scopes. The active profile is always shown in the top bar.</div>
+
+  <div class="two-col">
+    <div class="profile-list">
+      <div class="card">
+        <div class="card-title">
+          Saved Profiles
+          <button class="btn btn-primary" style="padding:3px 10px;font-size:11px;">+ New</button>
+        </div>
+        <div class="profile-item selected" onclick="selectProfile(this, 'New Operators', 'MRI-01 · MRI-02 · 3 conditions')">
+          <div><div class="profile-name">New Operators</div><div class="profile-scope">MRI-01 · MRI-02 · 3 conditions</div></div>
+          <div class="toggle on"></div>
+        </div>
+        <div class="profile-item" onclick="selectProfile(this, 'Brain Protocol Only', 'All scanners · 1 condition')">
+          <div><div class="profile-name">Brain Protocol Only</div><div class="profile-scope">All scanners · 1 condition</div></div>
+          <div class="toggle on"></div>
+        </div>
+        <div class="profile-item" onclick="selectProfile(this, 'High-Volume Days', 'Mon–Fri · 2 conditions')">
+          <div><div class="profile-name">High-Volume Days</div><div class="profile-scope">Mon–Fri · 2 conditions</div></div>
+          <div class="toggle"></div>
+        </div>
+        <div class="profile-item" onclick="selectProfile(this, 'Cardiac Exams', 'Hospital B · 2 conditions')">
+          <div><div class="profile-name">Cardiac Exams</div><div class="profile-scope">Hospital B · 2 conditions</div></div>
+          <div class="toggle on"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-editor">
+      <div class="card">
+        <div class="card-title">✏️ Edit Profile: <span id="profile-editor-name">New Operators</span></div>
+        <div style="font-size:12px;color:#6b7280;margin-bottom:12px;">Conditions (all must match)</div>
+        <div class="condition-row">
+          <select><option>Operator</option><option>Scanner</option><option>Site</option><option>Protocol</option></select>
+          <select><option>is</option><option>is not</option><option>contains</option></select>
+          <input type="text" value="New" style="flex:1;text-align:left;">
+          <span style="cursor:pointer;color:#ef4444;">✕</span>
+        </div>
+        <div class="condition-row">
+          <select><option>Scanner</option><option>Operator</option><option>Site</option></select>
+          <select><option>is one of</option><option>is</option><option>is not</option></select>
+          <input type="text" value="MRI-01, MRI-02" style="flex:1;text-align:left;">
+          <span style="cursor:pointer;color:#ef4444;">✕</span>
+        </div>
+        <div class="condition-row">
+          <select><option>Joined within</option><option>Protocol</option><option>Site</option></select>
+          <select><option>&lt; 30 days</option><option>&lt; 60 days</option><option>&lt; 90 days</option></select>
+          <input type="text" value="" style="flex:1;" placeholder="(auto)">
+          <span style="cursor:pointer;color:#ef4444;">✕</span>
+        </div>
+        <div class="add-condition">+ Add condition</div>
+        <div class="preview-count">🔍 Preview: This profile matches <strong>14 sessions</strong> in the last 7 days across MRI-01 and MRI-02.</div>
+        <div class="action-row">
+          <button class="btn btn-primary">💾 Save Profile</button>
+          <button class="btn btn-secondary" onclick="setActiveProfile()">✅ Set as Active</button>
+          <button class="btn btn-danger">🗑 Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- Navigation ---
+  function navigateTo(screenId) {
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const link = document.querySelector('[data-screen="' + screenId + '"]');
+    if (link) link.classList.add('active');
+    const screen = document.getElementById(screenId);
+    if (screen) screen.classList.add('active');
+  }
+
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      navigateTo(this.dataset.screen);
+    });
+  });
+
+  // --- Series expand/collapse ---
+  function toggleSeries(id) {
+    const row = document.getElementById(id);
+    if (!row) return;
+    const isVisible = row.style.display === 'table-row';
+    row.style.display = isVisible ? 'none' : 'table-row';
+  }
+
+  // --- Tab switching (Trends & Alerts screen) ---
+  function switchTab(tabId, btn) {
+    document.querySelectorAll('#s3 .tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#s3 .tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tabId).classList.add('active');
+    if (btn) btn.classList.add('active');
+  }
+
+  // --- IQ Marker toggle ---
+  function toggleIqMarker() {
+    const panel = document.getElementById('iq-marker-panel');
+    panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+  }
+
+  // --- Workflow view switch ---
+  function switchWorkflowView(view) {
+    const protoView = document.getElementById('view-protocol');
+    const tpView = document.getElementById('view-timeperiod');
+    const btnProto = document.getElementById('btn-protocol-view');
+    const btnTp = document.getElementById('btn-timeperiod-view');
+    if (view === 'protocol') {
+      protoView.style.display = 'block';
+      tpView.style.display = 'none';
+      btnProto.className = 'btn btn-primary';
+      btnProto.style.borderRadius = '6px 0 0 6px';
+      btnTp.className = 'btn btn-secondary';
+      btnTp.style.borderRadius = '0 6px 6px 0';
+    } else {
+      protoView.style.display = 'none';
+      tpView.style.display = 'block';
+      btnProto.className = 'btn btn-secondary';
+      btnProto.style.borderRadius = '6px 0 0 6px';
+      btnTp.className = 'btn btn-primary';
+      btnTp.style.borderRadius = '0 6px 6px 0';
+    }
+  }
+
+  // --- Protocol detail (Time Period View) ---
+  var protocolLabels = {
+    brain: 'Brain Protocol',
+    spine: 'Spine Protocol',
+    knee: 'Knee Protocol',
+    shoulder: 'Shoulder Protocol'
+  };
+  function showProtocolDetail(protocol) {
+    const panel = document.getElementById('protocol-detail-panel');
+    const title = document.getElementById('detail-panel-title');
+    title.textContent = '📋 ' + (protocolLabels[protocol] || protocol) + ' — Sequence Detail';
+    panel.style.display = 'block';
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // --- Active Profile badge update ---
+  function updateActiveProfile(name) {
+    const badge = document.querySelector('.active-profile-badge');
+    if (badge) badge.textContent = '👤 Active: ' + name;
+  }
+
+  function setActiveProfile() {
+    const name = document.getElementById('profile-editor-name').textContent;
+    updateActiveProfile(name);
+    const switcher = document.querySelector('.profile-switcher');
+    for (let i = 0; i < switcher.options.length; i++) {
+      if (switcher.options[i].text === name) {
+        switcher.selectedIndex = i;
+        break;
+      }
+    }
+  }
+
+  // --- Profile selection ---
+  function selectProfile(el, name, scope) {
+    document.querySelectorAll('.profile-item').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('profile-editor-name').textContent = name;
+  }
+</script>
+</body>
+</html>
